@@ -131,15 +131,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // Send the uppercase string back.
         String request = ((TextWebSocketFrame) frame).text();
         JSONObject jsonObject = JSON.parseObject(request);
-        String type = jsonObject.getString("type");
+        String event = jsonObject.getString("event");
 
-        if ("register".equalsIgnoreCase(type)) {
+        if ("register".equalsIgnoreCase(event)) {
             handleRegister(ctx, jsonObject);
-        } else if ("message".equalsIgnoreCase(type)) {
+        } else if ("message".equalsIgnoreCase(event)) {
             handleMessage(ctx, jsonObject);
-        } else if ("broadcast".equalsIgnoreCase(type)) {
+        } else if ("broadcast".equalsIgnoreCase(event)) {
             handleBroadcast(ctx, jsonObject);
-        } else if ("getOnLineUsers".equalsIgnoreCase(type)) {
+        } else if ("getOnLineUsers".equalsIgnoreCase(event)) {
             handleGetOnLineUsers(ctx, jsonObject);
         }
 
@@ -148,11 +148,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleRegister(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().register(jsonObject.getString("uuid"), ctx.channel().id());
+        MessageSender.getInstance().register(ctx.channel(), jsonObject);
     }
 
     private void handleMessage(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().message(jsonObject.getString("uuid"), jsonObject.toJSONString());
+        MessageSender.getInstance().message(jsonObject.getString("toUuid"), jsonObject.toJSONString());
     }
 
     private void handleBroadcast(ChannelHandlerContext ctx, JSONObject jsonObject) {
@@ -160,7 +160,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleGetOnLineUsers(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().getOnLineUsers(jsonObject.getString("uuid"));
+        MessageSender.getInstance().getOnLineUsers(jsonObject.getString("fromUuid"));
     }
 
     private static void sendHttpResponse(

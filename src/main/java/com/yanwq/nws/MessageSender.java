@@ -47,9 +47,10 @@ public class MessageSender {
         logger.info("channels:" + hashMap.values());
     }
 
-
-    public void register(String uuid, ChannelId channelId) {
-        hashMap.put(uuid, channelId);
+    public void register(Channel channel, JSONObject jsonObject) {
+        hashMap.put(jsonObject.getString("uuid"), channel.id());
+        jsonObject.put("ret", "ACK");
+        message(jsonObject.getString("uuid"), jsonObject.toJSONString());
         logger.debug(hashMap.keySet().toString());
     }
 
