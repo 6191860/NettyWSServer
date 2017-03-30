@@ -55,7 +55,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        MessageSender.getInstance().removeChannel(ctx.channel());
+        MessageSender.getInstance().removeChannel(ctx.channel().id());
     }
 
     @Override
@@ -139,12 +139,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             handleMessage(ctx, jsonObject);
         } else if ("broadcast".equalsIgnoreCase(event)) {
             handleBroadcast(ctx, jsonObject);
-        } else if ("getOnLineUsers".equalsIgnoreCase(event)) {
-            handleGetOnLineUsers(ctx, jsonObject);
+        } else if ("users".equalsIgnoreCase(event)) {
+            handleUsers(ctx, jsonObject);
         }
 
         logger.debug(String.format("%s received %s", ctx.channel(), request));
-        //ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
     }
 
     private void handleRegister(ChannelHandlerContext ctx, JSONObject jsonObject) {
@@ -152,15 +151,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleMessage(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().message(jsonObject.getString("toUuid"), jsonObject.toJSONString());
+        MessageSender.getInstance().message(jsonObject.getString("to_uuid"), jsonObject.toJSONString());
     }
 
     private void handleBroadcast(ChannelHandlerContext ctx, JSONObject jsonObject) {
         MessageSender.getInstance().broadcast(jsonObject.toJSONString());
     }
 
-    private void handleGetOnLineUsers(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().getOnLineUsers(jsonObject.getString("fromUuid"));
+    private void handleUsers(ChannelHandlerContext ctx, JSONObject jsonObject) {
+        MessageSender.getInstance().users(jsonObject.getString("uuid"));
     }
 
     private static void sendHttpResponse(

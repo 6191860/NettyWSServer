@@ -42,8 +42,8 @@ public class MessageSender {
         channels.add(channel);
     }
 
-    public void removeChannel(Channel channel) {
-        channels.remove(channel);
+    public void removeChannel(ChannelId channelId) {
+        channels.remove(channelId);
         logger.info("channels:" + hashMap.values());
     }
 
@@ -54,34 +54,34 @@ public class MessageSender {
         logger.debug(hashMap.keySet().toString());
     }
 
-    public void unRegister(String uuid) {
+    public void unregister(String uuid) {
         hashMap.remove(uuid);
         logger.debug(hashMap.keySet().toString());
     }
 
-    public void message(String uuid, String msg) {
+    public void message(String toUuid, String message) {
         logger.debug(hashMap.keySet().toString());
 
-        if (!hashMap.containsKey(uuid)) {
+        if (!hashMap.containsKey(toUuid)) {
             logger.debug("No user");
             return;
         }
 
-        Channel channel = channels.find(hashMap.get(uuid));
+        Channel channel = channels.find(hashMap.get(toUuid));
 
         if (channel == null) {
-            unRegister(uuid);
+            unregister(toUuid);
             logger.debug("No user");
             return;
         }
 
-        channel.writeAndFlush(new TextWebSocketFrame(msg));
+        channel.writeAndFlush(new TextWebSocketFrame(message));
         logger.debug("Send success");
     }
 
-    public void getOnLineUsers(String uuid) {
+    public void users(String uuid) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "getOnLineUser");
+        jsonObject.put("type", "users");
         jsonObject.put("users", JSON.parseArray(JSON.toJSONString(hashMap.keySet())));
         message(uuid, jsonObject.toJSONString());
     }

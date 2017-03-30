@@ -42,7 +42,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
                 super.userEventTriggered(ctx, evt);
                 if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
                     logger.info(ctx.channel().id() + "ping timeout,will be remove");
-                    MessageSender.getInstance().removeChannel(ctx.channel());
+                    MessageSender.getInstance().removeChannel(ctx.channel().id());
                 }
             }
         });
