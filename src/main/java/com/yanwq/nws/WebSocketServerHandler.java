@@ -49,13 +49,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        MessageSender.getInstance().addChannel(ctx.channel());
+        Sender.getInstance().addChannel(ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        MessageSender.getInstance().removeChannel(ctx.channel().id());
+        Sender.getInstance().removeChannel(ctx.channel());
     }
 
     @Override
@@ -147,19 +147,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleRegister(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().register(ctx.channel(), jsonObject);
+        Sender.getInstance().register(ctx.channel(), jsonObject);
     }
 
     private void handleMessage(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().message(jsonObject.getString("to_uuid"), jsonObject.toJSONString());
+        Sender.getInstance().message(jsonObject.getString("to_uuid"), jsonObject.toJSONString());
     }
 
     private void handleBroadcast(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().broadcast(jsonObject.toJSONString());
+        Sender.getInstance().broadcast(jsonObject.toJSONString());
     }
 
     private void handleUsers(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        MessageSender.getInstance().users(jsonObject.getString("uuid"));
+        Sender.getInstance().users(jsonObject.getString("uuid"));
     }
 
     private static void sendHttpResponse(

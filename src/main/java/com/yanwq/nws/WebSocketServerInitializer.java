@@ -41,8 +41,9 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
             public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
                 super.userEventTriggered(ctx, evt);
                 if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                    logger.info(ctx.channel().id() + "ping timeout,will be remove");
-                    MessageSender.getInstance().removeChannel(ctx.channel().id());
+                    logger.info(ctx.channel().id() + " ping timeout,will be remove");
+                    Sender.getInstance().removeChannel(ctx.channel());
+                    ctx.channel().closeFuture().sync();
                 }
             }
         });
