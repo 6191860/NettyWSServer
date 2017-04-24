@@ -131,35 +131,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // Send the uppercase string back.
         String request = ((TextWebSocketFrame) frame).text();
         JSONObject jsonObject = JSON.parseObject(request);
-        String event = jsonObject.getString("event");
-
-        if ("register".equalsIgnoreCase(event)) {
-            handleRegister(ctx, jsonObject);
-        } else if ("message".equalsIgnoreCase(event)) {
-            handleMessage(ctx, jsonObject);
-        } else if ("broadcast".equalsIgnoreCase(event)) {
-            handleBroadcast(ctx, jsonObject);
-        } else if ("users".equalsIgnoreCase(event)) {
-            handleUsers(ctx, jsonObject);
-        }
-
+        EventController.getInstance().call(ctx.channel(), jsonObject);
         logger.debug(String.format("%s received %s", ctx.channel(), request));
-    }
-
-    private void handleRegister(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        Sender.getInstance().register(ctx.channel(), jsonObject);
-    }
-
-    private void handleMessage(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        Sender.getInstance().message(jsonObject.getString("to_uuid"), jsonObject.toJSONString());
-    }
-
-    private void handleBroadcast(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        Sender.getInstance().broadcast(jsonObject.toJSONString());
-    }
-
-    private void handleUsers(ChannelHandlerContext ctx, JSONObject jsonObject) {
-        Sender.getInstance().users(jsonObject.getString("uuid"));
     }
 
     private static void sendHttpResponse(

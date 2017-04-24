@@ -23,14 +23,14 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
  * A HTTP server which serves Web Socket requests at:
- *
+ * <p>
  * http://localhost:8080/websocket
- *
+ * <p>
  * Open your browser at http://localhost:8080/, then the demo page will be loaded and a Web Socket connection will be
  * made automatically.
- *
+ * <p>
  * This server illustrates support for the different web socket specification versions and will work with:
- *
+ * <p>
  * <ul>
  * <li>Safari 5+ (draft-ietf-hybi-thewebsocketprotocol-00)
  * <li>Chrome 6-13 (draft-ietf-hybi-thewebsocketprotocol-00)
@@ -54,8 +54,8 @@ public class WebSocketServer {
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .childHandler(new WebSocketServerInitializer());
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new WebSocketServerInitializer());
 
             Channel ch = b.bind(port).sync().channel();
             System.out.println("Web socket server started at port " + port + '.');
@@ -69,6 +69,7 @@ public class WebSocketServer {
     }
 
     public static void main(String[] args) throws Exception {
+        new ChatMgr().initEvent();
         int port;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
