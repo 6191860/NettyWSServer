@@ -13,10 +13,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.yanwq.nws;
+package com.yanwq.nws.netty;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.yanwq.nws.event.EventMgr;
+import com.yanwq.nws.message.MessageConst;
+import com.yanwq.nws.message.MessageMgr;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -49,13 +52,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        Sender.getInstance().addChannel(ctx.channel());
+        MessageMgr.getInstance().addChannel(ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        Sender.getInstance().removeChannel(ctx.channel());
+        MessageMgr.getInstance().removeChannel(ctx.channel());
     }
 
     @Override
@@ -129,10 +132,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         // Send the uppercase string back.
-        String request = ((TextWebSocketFrame) frame).text();
-        JSONObject jsonObject = JSON.parseObject(request);
-        EventController.getInstance().call(ctx.channel(), jsonObject);
-        logger.debug(String.format("%s received %s", ctx.channel(), request));
+        String data = ((TextWebSocketFrame) frame).text();
+        EventMgr.getInstance().call(ctx.channel(), data);
+        String[] strings = data.split(MessageConst.SEPARATOR);
+        MessageMgr.getInstance().callSuccess(strings[0], strings[1]);
+        logger.debug("Receive<->" + data);
     }
 
     private static void sendHttpResponse(

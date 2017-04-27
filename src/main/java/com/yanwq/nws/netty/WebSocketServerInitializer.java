@@ -13,8 +13,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.yanwq.nws;
+package com.yanwq.nws.netty;
 
+import com.yanwq.nws.message.MessageMgr;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -42,7 +43,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
                 super.userEventTriggered(ctx, evt);
                 if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
                     logger.info(ctx.channel().id() + " ping timeout,will be remove");
-                    Sender.getInstance().removeChannel(ctx.channel());
+                    MessageMgr.getInstance().removeChannel(ctx.channel());
                     ctx.channel().closeFuture().sync();
                 }
             }
