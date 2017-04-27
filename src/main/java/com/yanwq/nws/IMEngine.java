@@ -10,18 +10,14 @@ import com.yanwq.nws.message.MessageMgr;
 import com.yanwq.nws.netty.WebSocketServer;
 import io.netty.channel.Channel;
 import org.apache.log4j.Logger;
-import sun.plugin2.message.Message;
 
 
 /**
- * Created by dodoca_android on 2017/4/24.
+ * Author: dodoca_android.
+ * Date:　 2017/4/24.
  */
 public class IMEngine {
-    Logger logger = Logger.getLogger(IMEngine.class.getSimpleName());
-
-    public IMEngine() {
-        super();
-    }
+    private Logger logger = Logger.getLogger(IMEngine.class.getSimpleName());
 
     public static void main(String[] args) throws Exception {
         new IMEngine().listen();
@@ -47,9 +43,9 @@ public class IMEngine {
                 } else if ("message".equalsIgnoreCase(event)) {
                     message(data);
                 } else if ("broadcast".equalsIgnoreCase(event)) {
-                    MessageMgr.getInstance().broadcast(jsonObject.toJSONString());
+                    MessageMgr.getInstance().broadcast(data);
                 } else if ("users".equalsIgnoreCase(event)) {
-                    users(jsonObject);
+                    users(data);
                 }
             }
         });
@@ -85,12 +81,12 @@ public class IMEngine {
 
     private void register(Channel channel, String message) {
         sendACK(message);
-        MessageMgr.getInstance().putUuidChannel(getFromUuid(message), channel);
+        MessageMgr.getInstance().putChannelId(getFromUuid(message), channel.id());
     }
 
     private void unregister(String message) {
         sendACK(message);
-        MessageMgr.getInstance().removeUuidChannel(getFromUuid(message));
+        MessageMgr.getInstance().removeChannelId(getFromUuid(message));
     }
 
     private void message(String message) {
@@ -105,10 +101,9 @@ public class IMEngine {
         });
     }
 
-    private void users(JSONObject data) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "users");
-        jsonObject.put("users", JSON.parseArray(JSON.toJSONString(MessageMgr.getInstance().getUuidChannel().keySet())));
-        MessageMgr.getInstance().send(data.getString("uuid"), jsonObject.toJSONString());
+    private void users(String message) {
+        JSONObject jsonObject = JSON.parseObject(message);
+        jsonObject.put("users", JSON.parseArray(JSON.toJSONString(MessageMgr.getInstance().getChannelIdMap().keySet())));
+        MessageMgr.getInstance().send(getFromUuid(message), jsonObject.toJSONString());
     }
 }

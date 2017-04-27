@@ -4,7 +4,7 @@ package com.yanwq.nws.message;
  * Created by dodoca_android on 2017/4/27.
  */
 public class MessageConst {
-    public static final String SEPARATOR = "$_$_$";
+    public static final String SEPARATOR = "<$-$>";
 
     /**
      * @param message received message

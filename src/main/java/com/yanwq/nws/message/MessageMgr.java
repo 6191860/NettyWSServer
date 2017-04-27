@@ -7,21 +7,21 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.log4j.Logger;
-import sun.plugin2.message.Message;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by yanweiqiang on 2017/2/23 0023.
+ * Author: yanweiqiang.
+ * Date:　 2017/2/23 0023.
  */
 public class MessageMgr {
     private Logger logger = Logger.getLogger(MessageMgr.class.getName());
     private ChannelGroup channels;
-    private Map<String, ChannelId> uuidChannel;
+    private Map<String, ChannelId> channelIdMap;
     //For remove channel avoid loop.
-    private Map<ChannelId, String> channelUuid;
+    private Map<ChannelId, String> uuidMap;
     private Map<String, MessageCallback> messageCallbackMap;
 
     private static MessageMgr instance;
@@ -39,8 +39,8 @@ public class MessageMgr {
 
     private MessageMgr() {
         channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-        uuidChannel = new HashMap<String, ChannelId>();
-        channelUuid = new HashMap<ChannelId, String>();
+        channelIdMap = new HashMap<String, ChannelId>();
+        uuidMap = new HashMap<ChannelId, String>();
         messageCallbackMap = new HashMap<String, MessageCallback>();
     }
 
@@ -50,24 +50,24 @@ public class MessageMgr {
 
     public void removeChannel(Channel channel) {
         channels.remove(channel);
-        String uuid = channelUuid.get(channel.id());
-        uuidChannel.remove(uuid);
-        channelUuid.remove(channel.id());
-        logger.info("remove channel uuid:" + uuid);
+        String uuid = uuidMap.get(channel.id());
+        channelIdMap.remove(uuid);
+        uuidMap.remove(channel.id());
+        logger.info("Remove channel uuid:" + uuid);
     }
 
-    public void putUuidChannel(String uuid, Channel channel) {
-        uuidChannel.put(uuid, channel.id());
-        channelUuid.put(channel.id(), uuid);
+    public void putChannelId(String uuid, ChannelId channelId) {
+        channelIdMap.put(uuid, channelId);
+        uuidMap.put(channelId, uuid);
     }
 
-    public void removeUuidChannel(String uuid) {
-        channelUuid.remove(uuidChannel.get(uuid));
-        uuidChannel.remove(uuid);
+    public void removeChannelId(String uuid) {
+        uuidMap.remove(channelIdMap.get(uuid));
+        channelIdMap.remove(uuid);
     }
 
-    public Map<String, ChannelId> getUuidChannel() {
-        return uuidChannel;
+    public Map<String, ChannelId> getChannelIdMap() {
+        return channelIdMap;
     }
 
     public void callSuccess(String msgId, String message) {
@@ -92,11 +92,10 @@ public class MessageMgr {
     }
 
     public boolean send(String uuid, String message, MessageCallback callback) {
-        logger.debug(uuidChannel.keySet().toString());
         String msgId = UUID.randomUUID().toString();
         String wrappedMsg = msgId + MessageConst.SEPARATOR + message;
 
-        if (!uuidChannel.containsKey(uuid)) {
+        if (!channelIdMap.containsKey(uuid)) {
             logger.debug("Unknown user");
             if (callback != null) {
                 callback.onFailure(message, MessageCallback.FailureType.UNKNOWN_USER);
@@ -104,11 +103,11 @@ public class MessageMgr {
             return false;
         }
 
-        Channel channel = channels.find(uuidChannel.get(uuid));
+        Channel channel = channels.find(channelIdMap.get(uuid));
 
         if (channel == null) {
             logger.debug("Unknown channel");
-            removeUuidChannel(uuid);
+            removeChannelId(uuid);
             if (callback != null) {
                 callback.onFailure(message, MessageCallback.FailureType.UNKNOWN_CHANNEL);
             }
@@ -121,7 +120,7 @@ public class MessageMgr {
     }
 
     public void broadcast(String msg) {
-        logger.debug(uuidChannel.keySet().toString());
+        logger.debug(uuidMap.keySet().toString());
         channels.writeAndFlush(new TextWebSocketFrame(msg));
     }
 }
